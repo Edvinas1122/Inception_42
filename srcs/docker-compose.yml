@@ -1,0 +1,60 @@
+version: '3'
+
+# declaring network is not nececary 
+networks:
+  localhost:
+    name: lnmp_network
+
+services:
+  nginx:
+    build:
+      context: requirements/nginx/
+    depends_on:
+      - "php"
+    env_file:
+      - .env
+    ports:
+      - "443:443"
+    volumes:
+      - php_data:/var/www/wordpress/
+    networks:
+      - localhost
+
+  php:
+    depends_on:
+      - "mariadb"
+    build:
+      context: requirements/wordpress/
+    volumes:
+      - php_data:/var/www/wordpress/
+    env_file:
+      - .env
+    networks:
+      - localhost
+
+  mariadb:
+    build:
+      context: requirements/mariadb/
+    volumes:
+      - db_data:/var/lib/mysql
+    env_file:
+      - .env
+    networks:
+      - localhost
+
+volumes:
+  db_data:
+    driver: local
+    name: db_data
+    driver_opts:
+      o: bind
+      type: none
+      device: /home/emomkus/data/db
+
+  php_data:
+    driver: local
+    name: php_data
+    driver_opts:
+      o: bind
+      type: none
+      device: /home/emomkus/data/wp
